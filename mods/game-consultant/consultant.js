@@ -7,7 +7,7 @@ var GameConsultant = GameConsultant || {};
 (function () {
   var GC = GameConsultant;
   if (GC.VERSION) return; // already loaded; wrapping the UI twice would run every hook twice
-  GC.VERSION = '1.1.0';
+  GC.VERSION = '1.2.0';
 
   var POOR = 0.8; // options below 80% of the best one are "poor"
   var SALES_WEIGHT = 0.1; // half the market costs ~7% of score: reviews first, sales as a tie-breaker
@@ -97,6 +97,44 @@ var GameConsultant = GameConsultant || {};
   // Topic/genre multiplies every design/tech point; a <=0.7 topic/genre or topic/audience match squeezes any
   // score above 6/10; repeating the last game's topic+genre costs 0.4 of the review bonus.
 
+  // Your own console (Sales.sellConsole / getConsoleIncome / getSalesAnomalyForConsole): each week it sells a share of
+  // the units it has left (20%, 13% then 10% x 0.15-0.3 as it ages), and while one of your games on it is in the
+  // top-100 chart that week's console sales grow by (101 - chart rank) / 100, up to +100%.
+  var CHART_WEEKS = 12; // roughly how long a hit stays in the charts
+  var CHART_BOOST = 0.8; // average (101 - rank) / 100 over that time for a game near the top
+  var ownConsoleBoost = function (p, size) {
+    var company = GameManager.company;
+    if (p.saleCancelled || p.soldOut) return 0;
+    var remaining = 1e6 * p.unitsSold * Sales.consoleUnitPrice - (p.currentSalesCash || 0);
+    var published = General.getWeekFromDateString(p.published);
+    var release = Math.ceil(company.currentWeek + devWeeks(size));
+    var extra = 0;
+    for (var week = Math.ceil(company.currentWeek); week < release + CHART_WEEKS && remaining > 0; week++) {
+      var age = week - published;
+      var income = remaining * (age < 10 ? 0.2 : age < 20 ? 0.13 : 0.1) * 0.225;
+      if (week >= release) extra += income * CHART_BOOST; // the boost adds units on top, it doesn't use up the rest
+      remaining -= income;
+    }
+    return Math.max(0, extra);
+  };
+
+  // What one unit of platform market earned your recent finished games (median), to compare console money with sales.
+  var marketRevenue = function () {
+    var company = GameManager.company;
+    var ratios = company.gameLog.filter(function (g) {
+      return !g.flags.isExtensionPack && g.revenue > 0 && g.platforms && g.platforms.length &&
+        (g.soldOut || company.currentWeek - g.releaseWeek > 30);
+    }).slice(-6).map(function (g) {
+      var n = g.platforms.length;
+      var reach = g.platforms.reduce(function (s, p, i) {
+        var share = n == 1 ? 1 : i == 0 ? 0.7 : i == 1 ? (n == 2 ? 0.55 : 0.4) : 0.3;
+        return s + (p ? Platforms.getMarketSizeForWeek(p, g.releaseWeek, company) * share : 0);
+      }, 0);
+      return reach ? g.revenue / reach : 0;
+    }).filter(function (x) { return x > 0; }).sort(function (a, b) { return a - b; });
+    return ratios.length ? ratios[Math.floor(ratios.length / 2)] : 0;
+  };
+
   var buildModel = function (opts) {
     opts = opts || {};
     var company = GameManager.company;
@@ -122,6 +160,7 @@ var GameConsultant = GameConsultant || {};
         audNorm[a] = Platforms.getPlatformsAudienceWeighting(p.audienceWeightings, a);
         audRaw[a] = Platforms.getPlatformsAudienceWeighting(p.audienceWeightings, a, true);
       });
+      var boost = p.isCustom ? ownConsoleBoost(p, size) : null;
       info[p.id] = {
         genre: genre,
         audNorm: audNorm,
@@ -129,9 +168,13 @@ var GameConsultant = GameConsultant || {};
         market: Platforms.getMarketSize(p, company),
         tech: p.techLevel,
         isPC: p.id === 'PC',
-        licensed: company.licencedPlatforms.indexOf(p) != -1
+        licensed: company.licencedPlatforms.indexOf(p) != -1,
+        // extra console revenue from a charting game, in the same market units as `market`
+        boost: boost && revenuePerMarket ? boost / revenuePerMarket : 0,
+        boostCash: boost || 0
       };
     };
+    var revenuePerMarket = onMarket.some(function (p) { return p.isCustom; }) ? marketRevenue() : 0;
     onMarket.forEach(addInfo);
     (game && game.platforms || []).forEach(addInfo);
 
@@ -244,14 +287,16 @@ var GameConsultant = GameConsultant || {};
     }
     var minTech = 8;
     for (i = 0; i < n; i++) if (!m.info[P[i].id].isPC) minTech = Math.min(minTech, m.info[P[i].id].tech);
-    var sales = 0;
+    var sales = 0, boostCash = 0;
     for (i = 0; i < n; i++) {
       inf = m.info[P[i].id];
       var share = n == 1 ? 1 : i == 0 ? 0.7 : i == 1 ? (n == 2 ? 0.55 : 0.4) : 0.3;
       sales += inf.market * share * (minTech / (inf.isPC ? minTech : inf.tech)) * inf.audNorm[a];
+      sales += inf.boost; // a charting game on your own console also sells consoles
+      boostCash += inf.boostCash;
     }
     var q = mix * penalty * spread;
-    return { q: q, sales: sales, value: q * Math.pow(Math.max(sales, 1), SALES_WEIGHT), mix: mix, penalty: penalty, spread: spread };
+    return { q: q, sales: sales, boostCash: boostCash, value: q * Math.pow(Math.max(sales, 1), SALES_WEIGHT), mix: mix, penalty: penalty, spread: spread };
   };
 
   var bestPlatforms = function (m, g, g2, a, count) {
@@ -431,6 +476,8 @@ var GameConsultant = GameConsultant || {};
     if (r.t.trend > 1) html += '<span class="gc-chip gc-great">Trend +' + Math.round(100 * (r.t.trend - 1)) + '%</span>';
     if (r.t.trend < 1) html += '<span class="gc-chip gc-bad">Trend ' + Math.round(100 * (r.t.trend - 1)) + '%</span>';
     if (r.p.spread < 1) html += '<span class="gc-chip gc-okay">Tech gap -' + Math.round(100 * (1 - r.p.spread)) + '%</span>';
+    if (r.p.boostCash > 0) html += '<span class="gc-chip gc-great" title="While the game is in the top-100 chart your console sells up to twice as many units">' +
+      'Own console: ~' + esc(UI.getShortNumberString(r.p.boostCash)) + ' extra console sales</span>';
     r.t.notes.forEach(function (n) {
       html += '<span class="gc-chip gc-bad">' + esc(n) + '</span>';
     });
@@ -620,7 +667,8 @@ var GameConsultant = GameConsultant || {};
         if (field === 'genre' && b.result.genre2 && !sel.genre2) detail += ' +' + b.result.genre2.name;
       }
       else detail = 'Genre ' + tierOf(GameGenre.getGenreWeighting(b.option.genreWeightings, b.result.genre, b.result.genre2)) +
-        (company.canSetTargetAudience() ? DOT + 'Audience ' + tierOf(Platforms.getPlatformsAudienceWeighting(b.option.audienceWeightings, b.result.audience, true)) : '');
+        (company.canSetTargetAudience() ? DOT + 'Audience ' + tierOf(Platforms.getPlatformsAudienceWeighting(b.option.audienceWeightings, b.result.audience, true)) : '') +
+        (m.info[b.option.id] && m.info[b.option.id].boostCash > 0 ? DOT + '+' + UI.getShortNumberString(m.info[b.option.id].boostCash) + ' consoles' : '');
       b.$el.append('<div class="gc-badge ' + gradeClass(b.ratio) + '">' + label + '<span class="gc-detail">' + esc(detail) + '</span></div>');
       b.$el.attr('title', 'Best with this: ' + describe(b.result));
       if (b.ratio >= 0.995) b.$el.addClass('gc-best');

@@ -20,6 +20,17 @@ market trend.
   (Gameling, Vena Gear, grPhone and similar handhelds can't do Large/AAA games) and never touches settings the game
   has locked (expansion packs). Ties go to combos you haven't made yet, then to topics you haven't used for longest.
 
+**Your own consoles**
+- Custom consoles from the hardware lab are rated like any platform, with the genre/audience weightings the game gave
+  them from your release history (your two most-made genres +++, the third ++, ...).
+- Releasing a game on your own console also sells consoles: while the game is in the top-100 chart, the console's
+  weekly sales grow by up to +100% (`Sales.getSalesAnomalyForConsole`). The consultant simulates the console's
+  remaining sales from the game's release (about 12 chart weeks near the top) and converts that money into market
+  size using what your recent finished games earned per unit of platform market. The card shows it as
+  *"Own console: ~16.5M extra console sales"*, and the console's platform badge lists it.
+- A strong console (2.5M planned units) becomes the best platform for its +++ and ++ genres; for genres it rates
+  poorly, a better-matching console still wins.
+
 **Sequels and expansion packs**
 - **Develop Sequel...** opens the game's "Select Game" list; a Consultant window beside it rates the game you are
   looking at, e.g. *"This game is currently a great pick for a sequel on Playsystem 2 for Everyone audiences."*, or
@@ -138,6 +149,7 @@ Open http://localhost:8766/ and use the console helpers:
 ```js
 await GDTDev.newCompany({ year: 11, licence: ['Playsystem'] }); // all topics, main research, platforms of that year
 GDTDev.hireStaff([{ name: 'Ada', d: 0.6, t: 1.3, expert: 'Engine' }]); // employees (UI skill = 500 x d/t)
+GDTDev.launchConsole({ name: 'Corp Station', startAmount: 0.6, unitsSold: 2.5 }); // a released custom console
 await GDTDev.openConcept();                                      // the Game Concept dialog
 await GDTDev.openStage(2);                                       // stage dialog of the game in development
 await GDTDev.openSequel();                                       // "Develop Sequel..." (openSequel(true): expansion pack)

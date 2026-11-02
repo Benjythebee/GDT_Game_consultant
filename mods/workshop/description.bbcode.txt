@@ -11,6 +11,12 @@ It only uses what [b]your[/b] company has: the topics you researched, the featur
 [*][b]Create perfect combo automatically[/b] picks topic, genre(s), audience and platforms in one click. It keeps the game size and platform slots you chose, only uses consoles you own (and tells you when a licence would be worth it), and prefers combos you haven't made yet.
 [/list]
 
+[h2]Your own consoles[/h2]
+[list]
+[*]Custom consoles from your hardware lab are rated with the genre and audience strengths the game gave them.
+[*]A hit on your own console also sells consoles (up to twice as many while it is in the charts): the consultant counts that extra console money, so your console wins for the genres it is good at.
+[/list]
+
 [h2]Development stages[/h2]
 [list]
 [*]Each slider shows how much that area matters for [i]this[/i] game (genre and topic, including the topic overrides the wiki tables miss), a recommended value and a marker.

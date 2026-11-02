@@ -129,6 +129,25 @@ var GDTDev = {};
     });
   };
 
+  // Release a custom console (fields as GameManager.finishCustomConsole sets them; weightings from your release history).
+  //   GDTDev.launchConsole({ name: 'Corp Station', techLevel: 4, startAmount: 0.4, unitsSold: 0.8, weeksAgo: 2 })
+  GDTDev.launchConsole = function (opts) {
+    opts = opts || {};
+    var c = GameManager.company;
+    var d = c.getDate(c.currentWeek / GameManager.flags.gameLengthModifier - (opts.weeksAgo || 2));
+    var p = {
+      id: 'dev-console-' + c.licencedPlatforms.length, isCustom: true, iconUri: './images/platforms/G64.png',
+      name: opts.name || 'Corp Station', company: c.name, published: d.year + '/' + d.month + '/' + d.week, developmentCosts: 0,
+      genreWeightings: GameManager.getCalculatedPlatformGenreWeightings(),
+      audienceWeightings: GameManager.getCalculatedPlatformAudienceWeightings(),
+      techLevel: opts.techLevel || 4, isGoodTech: true, featureFactor: 1, startAmount: opts.startAmount || 0.4,
+      unitsSold: opts.unitsSold || 0.8, qF: 1, successFactor: 1, version: 1
+    };
+    c.licencedPlatforms.filter(function (x) { return x.isCustom; }).forEach(function (x) { x.saleCancelled = true; });
+    c.licencedPlatforms.push(p);
+    return p;
+  };
+
   // Skip straight to the slider dialog of a stage (1-3) for the game currently in development.
   // Earlier stages are logged with equal thirds; staff animation does not advance the game in a plain browser.
   GDTDev.openStage = async function (stage, points) {

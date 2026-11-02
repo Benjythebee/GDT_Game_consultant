@@ -160,6 +160,11 @@ Useful wiki pages: `Review_Algorithm/1.4.4`, `Tech_and_Design_Points_Generation_
   capture it (never call getAvailable itself: it advances the offers). Contract fields: topic/genre/platform ids,
   gameSize, gameAudience, minScore, payment, penalty, royaltyRate; `_setContractRequirements` turns them into
   `lockedSettings`. Expected score = average of the last 5 games' `score` x the combo's % of the best game.
+- Custom consoles: `isCustom` platforms in `licencedPlatforms` (on market while released and not `soldOut`), weightings
+  from `GameManager.getCalculatedPlatformGenreWeightings/AudienceWeightings` at launch. The mod adds the chart boost to
+  console sales (`Sales.getSalesAnomalyForConsole`, simulated in `ownConsoleBoost`, 12 chart weeks at 0.8) to the
+  platform's sales term, converted to market units with `marketRevenue()` (median revenue per unit of release-week
+  market of recent finished games). Test with `GDTDev.launchConsole()`.
 - Harness + real saves: the game shows a "mods mismatch" dialog when a save's `company.mods` differs from the enabled
   mods; `GDTDev.loadSave` clears both in the browser copy.
 - Harness gotchas: the game re-renders `<body>` with jQuery (re-running body scripts), so mods are injected from
