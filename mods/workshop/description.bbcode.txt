@@ -1,53 +1,33 @@
 [h1]Game Consultant[/h1]
-An in-game advisor that plans your games with the game's own rules. No more alt-tabbing to wiki tables: every choice you make while creating a game is rated on the spot, and one click builds the perfect combo for you.
-
-It only uses what [b]your[/b] company has: the topics you researched, the features you unlocked (multi-genre, target audience, multi-platform), the consoles on the market [i]right now[/i], your licences, your cash, your staff, your game history and the current trend.
+An in-game advisor built on the game's own rules. It rates your choices as you plan a game and can pick the perfect combo in one click. It only uses what your company has: researched topics, unlocked features, consoles on the market now, your staff and your history.
 
 [h2]Game Concept[/h2]
 [list]
-[*]Every topic, genre, second genre, platform and audience button gets a badge: [b]★ Best[/b], or how close the best game you can still make with it gets to your best option (e.g. 92%), plus the direct match (+++ RPG, Genre ++ · Audience +++).
-[*]Weak options are dimmed, or hidden and sorted best-first with [b]Hide poor options[/b].
-[*]A Consultant card rates your combo (topic/genre, topic/audience, platform/genre, platform/audience, trend, multi-platform tech gap) and warns you about repeating your last game.
-[*][b]Create perfect combo automatically[/b] picks topic, genre(s), audience and platforms in one click. It keeps the game size and platform slots you chose, only uses consoles you own (and tells you when a licence would be worth it), and prefers combos you haven't made yet.
-[/list]
-
-[h2]Your own consoles[/h2]
-[list]
-[*]Custom consoles from your hardware lab are rated with the genre and audience strengths the game gave them.
-[*]A hit on your own console also sells consoles (up to twice as many while it is in the charts): the consultant counts that extra console money, so your console wins for the genres it is good at.
+[*]Topics, genres, audiences and platforms get a badge: [b]★ Best[/b] or a score like 92%.
+[*]Poor options are dimmed, or hidden with [b]Hide poor options[/b].
+[*]A side card rates your combo and warns about repeats.
+[*][b]Create perfect combo automatically[/b] fills everything in.
 [/list]
 
 [h2]Development stages[/h2]
 [list]
-[*]Each slider shows how much that area matters for [i]this[/i] game (genre and topic, including the topic overrides the wiki tables miss), a recommended value and a marker.
-[*]The plan covers all three stages: it chases the review bonuses for focusing on the right areas, avoids the penalties for neglecting them, and steers your tech/design ratio to the genre target.
-[*][b]Apply recommendation[/b] sets the sliders, or let [b]Auto-apply[/b] do it every stage.
+[*]Recommended slider values for every stage, based on your exact topic and genre.
+[*]From medium games on, suggests who to put on each area based on skills, experts and workload.
+[*][b]Apply[/b] sets it all, or turn on [b]Auto-apply[/b].
 [/list]
 
-[h2]Employees (medium games and up)[/h2]
+[h2]Sequels, deals and consoles[/h2]
 [list]
-[*]Suggests who should be responsible for each area, using their design/tech skills, specialisations and workload, and [b]Apply sliders + staff[/b] assigns them for you.
-[*]Warns about unassigned areas and overloaded staff, and counts the experts you need for a perfect score (and for AAA).
-[*]The concept card compares your team with the ideal size for the game, and for AAA the perfect combo favours genres your experts cover.
-[/list]
-
-[h2]Sequels and expansion packs[/h2]
-[list]
-[*]When you pick a game for a sequel, a window tells you if it is a good idea right now, e.g. [i]"This game is currently a great pick for a sequel on Playsystem 2 for Everyone audiences."[/i]
-[*]It checks the 40-week rule (counting your real development time), whether you have a newer engine than the original (+0.2 and more hype), retired consoles and repeat penalties, and ranks your best sequel candidates.
-[/list]
-
-[h2]Publishing deals[/h2]
-[list]
-[*]Ranks the offers by how close a game each deal still lets you make to your best one, checks the minimum review score against what you can expect, and shows pay, royalties, licence costs and deals that need research first.
+[*][b]Sequels:[/b] tells you which games are a great pick right now, and when to wait.
+[*][b]Publishing deals:[/b] ranks offers by how good a game they let you make.
+[*][b]Your own consoles:[/b] counts the extra consoles a hit sells.
 [/list]
 
 [h2]Good to know[/h2]
 [list]
-[*]Made for Game Dev Tycoon 1.7.x (tested on 1.7.9). Needs the official Game Dev Tycoon Mod API, which ships with the game.
-[*]It reads the game's own data and formulas, so modded topics and consoles are rated too.
-[*]It never changes your save: it only fills in the same fields you would. You can disable it at any time.
-[*]Settings (hide poor options, auto-apply) are remembered with the game's settings.
+[*]For Game Dev Tycoon 1.7.x. Needs the Mod API that ships with the game.
+[*]Works with modded topics and consoles.
+[*]Safe to turn off at any time.
 [/list]
 
-Feedback and ideas are welcome in the comments!
+Feedback welcome in the comments!
