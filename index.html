@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game Dev Tycoon Helper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="title-row">
+        <div>
+          <h1>Game Dev Tycoon Helper</h1>
+          <p class="sub">Pick what you know. Poor matches for everything else get filtered out as you go.</p>
+        </div>
+        <div class="actions">
+          <button type="button" id="fill-best" class="btn primary">Fill in the best rest</button>
+          <button type="button" id="reset" class="btn">Reset</button>
+        </div>
+      </div>
+      <div class="controls">
+        <label>Hide options rated below
+          <select id="min-rating">
+            <option value="3">Great (+++)</option>
+            <option value="2">Good (++)</option>
+            <option value="1" selected>Okay (+)</option>
+            <option value="-3">Show everything</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="show-filtered"> Show hidden options dimmed</label>
+        <label class="check"><input type="checkbox" id="sort-rating" checked> Best matches first</label>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section id="fields" class="fields" aria-label="Game properties"></section>
+    <aside id="summary" class="summary" aria-live="polite"></aside>
+  </main>
+
+  <footer class="wrap foot">
+    Data from the <a id="source-link" href="#" target="_blank" rel="noopener">Game Dev Tycoon wiki</a>
+    ("Game Development Based on Experience", 1.4.x tables). A filled badge is the option's worst direct match with what you picked;
+    an outlined badge means there is no direct match, and shows the best full game you can still make with it.
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

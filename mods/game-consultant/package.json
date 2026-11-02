@@ -1,0 +1,13 @@
+{
+	"id": "game-consultant",
+	"name": "Game Consultant",
+	"version": "1.1.0",
+	"author": "Benjythebee",
+	"description": "An in-game advisor that uses the game's own rules. Rates every topic, genre, audience and platform while you plan a game, creates the perfect combo in one click, recommends sliders and staff for each development stage, and tells you which games make great sequels and which publishing deals are worth taking. Only uses what your company has unlocked and the consoles on the market right now.",
+	"url": "https://github.com/Benjythebee/GDT_Game_consultant",
+	"main": "./consultant.js",
+	"image": "image.png",
+	"dependencies": {
+		"gdt-modAPI": "0.1.x"
+	}
+}
