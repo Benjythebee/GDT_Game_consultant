@@ -66,6 +66,20 @@ market trend.
   ratio at release against the genre target, the expected review bonus, and the plan for the remaining stages.
 - **Apply recommendation** sets the sliders; **Auto-apply** does it at every stage.
 
+**Additional features**
+- Each area turns at most `share% / (5 x size factor)` of feature benefit into points (size factor 1, Large 0.7,
+  AAA 0.4; `General.getFeatureEfficiencyFromMissionFocus`). Past that the game shows "(x%)" on the area and the extra
+  features are paid for but add nothing. Feature costs also grow faster than their benefit (about 5K per point at
+  benefit 1-2, 15K at 10, 28K at 14, times the game size).
+- In every stage's "Selected Features" list, the consultant fills each area's capacity with features you already have,
+  then the selected ones with the cheapest benefit per dollar, and tags the rest at your current sliders:
+  **✗ wasted**, **mostly wasted**, or **pricey** (over 3x the cost per useful point of the cheapest useful feature).
+  The tooltip gives the numbers. Tags update as you move the sliders. Example: with Gameplay at 24%, Character
+  progression (60K) was ✗ wasted and Achievements mostly wasted; dropping both removed the game's "(48%)" and saved 80K.
+- On the Game Concept feature screen, the newest graphics type is marked **★ most points** (its tech level adds base
+  points to every area), and older ones say **✗ caps reviews at N** when the game is Large (needs tech 3) or AAA
+  (needs tech 5).
+
 **Employees (medium games and up)**
 - From medium size on, every area needs a responsible person. The consultant suggests one per area (shown under the
   slider, e.g. `→ Ada (expert)`), and **Apply sliders + staff** assigns them as if you had dragged them there.

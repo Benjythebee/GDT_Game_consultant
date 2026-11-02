@@ -7,7 +7,7 @@ var GameConsultant = GameConsultant || {};
 (function () {
   var GC = GameConsultant;
   if (GC.VERSION) return; // already loaded; wrapping the UI twice would run every hook twice
-  GC.VERSION = '1.2.0';
+  GC.VERSION = '1.3.0';
 
   var POOR = 0.8; // options below 80% of the best one are "poor"
   var SALES_WEIGHT = 0.1; // half the market costs ~7% of score: reviews first, sales as a tie-breaker
@@ -1538,6 +1538,7 @@ var GameConsultant = GameConsultant || {};
       'expert); workload over 100% costs a lot and causes bugs.'] : [], [
       'T/D: expected tech/design ratio at release vs. the genre target (within 25% earns a review bonus).',
       'Bonus: expected review bonus from time allocation and T/D, if the next stages follow the plan.']).join('\n'));
+    tagStageFeatures(); // feature value depends on the sliders, so re-tag on every change
   };
 
   var stageTimer = null;
@@ -1558,6 +1559,116 @@ var GameConsultant = GameConsultant || {};
     scheduleStage();
   });
   wrap('_updateFeatureFocusPreview', scheduleStage);
+
+  // ---------------------------------------------------------------- additional features
+  // General.getFeatureEfficiencyFromMissionFocus: an area turns at most share% / (5 x size factor) of feature benefit
+  // ("v") into points (size factor 1, large 0.7, AAA 0.4). Past that the game shows "(x%)" on the area and the extra
+  // features are paid for but add nothing. Research.getDevCost also grows faster than v: about 5K per point of benefit
+  // at v1-2, 15K at v10 and 28K at v14, times the game size.
+
+  var tag = function ($el, text, cls, title) {
+    $el.append($('<span class="gc-ftag ' + cls + '"></span>').text(text).attr('title', title));
+  };
+
+  var tagStageFeatures = function () {
+    var $items = dialog().find('.featureSelectionPanel .selectableGameFeatureItem');
+    if (!$items.length || !GameManager.company.currentGame) return;
+    var game = GameManager.company.currentGame;
+    var missions = [Missions.Stage1Missions, Missions.Stage2Missions, Missions.Stage3Missions][GameManager.getCurrentDevStage() - 1] || [];
+    var ids = missions.map(function (m) { return m.id; });
+    var shares = UI._getSelectedFeaturePercentages().map(function (p) { return p / 100; });
+    var selected = UI._getSelectedFeatures();
+    var owned = game.features || [];
+    var absorb = game.gameSize === 'aaa' ? 0.4 : game.gameSize === 'large' ? 0.7 : 1;
+    var costOf = function (f) {
+      return owned.indexOf(f) !== -1 ? 0 : Research.getDevCost(f, game);
+    };
+    // Per area, the benefit it can absorb goes to features already paid for first, then to the selected ones with
+    // the cheapest benefit per dollar; whatever doesn't fit is what's wasted.
+    var used = {};
+    var fill = {};
+    ids.forEach(function (id, mi) {
+      var room = 100 * shares[mi] / (5 * absorb);
+      var kept = selected.concat(owned).filter(function (x, i, all) { return all.indexOf(x) === i && x.category === id && x.v; });
+      kept.sort(function (a, b) { return costOf(a) / a.v - costOf(b) / b.v || a.v - b.v; });
+      var sum = 0;
+      kept.forEach(function (x) {
+        used[x.id] = Math.min(Math.max((room - sum) / x.v, 0), 1);
+        sum += x.v;
+      });
+      fill[id] = { room: room, sum: sum };
+    });
+    var rows = [];
+    $items.each(function () {
+      var f = General.getFeature($(this).attr('feature-id'));
+      var mi = f ? ids.indexOf(f.category) : -1;
+      if (!f || !f.v || mi < 0) return;
+      var area = fill[f.category];
+      var isKept = used.hasOwnProperty(f.id);
+      var u = used[f.id];
+      if (!isKept) {
+        // adding it (replacing the selected one of its group, if any) only uses the room left
+        var replaced = selected.filter(function (x) { return f.group && x.group === f.group && x.category === f.category; })
+          .reduce(function (s, x) { return s + x.v; }, 0);
+        u = Math.min(Math.max((area.room - area.sum + replaced) / f.v, 0), 1);
+      }
+      rows.push({
+        $el: $(this), f: f, used: u, gain: u * f.v, paid: owned.indexOf(f) !== -1, cost: costOf(f),
+        share: shares[mi], mission: missions[mi], room: area.room, load: area.sum - (isKept ? f.v : 0)
+      });
+    });
+    var rates = rows.filter(function (r) { return !r.paid && r.used >= 0.5; }).map(function (r) { return r.cost / r.gain; });
+    var bestRate = rates.length ? Math.min.apply(null, rates) : 0;
+    rows.forEach(function (r) {
+      r.$el.find('.gc-ftag').remove();
+      if (r.paid) return; // already in the engine/game: no further cost
+      var title = r.f.name + ' adds ' + pct(r.used) + ' of its benefit at your current sliders. ' + r.mission.name + ' gets ' +
+        Math.round(100 * r.share) + '% of this stage, enough for about ' + Math.round(r.room) + ' benefit; the other features there use ' +
+        Math.round(r.load) + '. Cost: ' + UI.getShortNumberString(r.cost) + '.';
+      if (r.used < 0.05) tag(r.$el, '\u2717 wasted', 'gc-bad', title + ' Skip it, or give ' + r.mission.name + ' more time.');
+      else if (r.used < 0.5) tag(r.$el, 'mostly wasted', 'gc-okay', title);
+      else if (bestRate && r.cost / r.gain > 3 * bestRate) {
+        tag(r.$el, 'pricey', 'gc-grey', title + ' Each useful point costs ' + Math.round(r.cost / r.gain / bestRate) +
+          'x more than with the cheapest useful feature here.');
+      }
+    });
+  };
+
+  // Game Concept, feature screen: the graphics type sets the game's tech level, which adds base points to every area
+  // (General.getGameBasePoints: 2, 5, 7, 10, 15, 20, 30, 40 by level) and caps Large (needs 3) and AAA (needs 5) reviews.
+  var tagConceptFeatures = function () {
+    var $items = dialog().find('.dialogScreen2 .selectableGameFeatureItem');
+    if (!$items.length || !GameManager.company.currentGame) return;
+    var size = GameManager.company.currentGame.gameSize || 'small';
+    var graphics = [];
+    $items.each(function () {
+      var f = General.getFeature($(this).attr('feature-id'));
+      $(this).find('.gc-ftag').remove();
+      if (f && f.group === 'graphic-type' && f.techLevel !== undefined) graphics.push({ $el: $(this), f: f });
+    });
+    var top = Math.max.apply(null, graphics.map(function (g) { return g.f.techLevel; }).concat([0]));
+    graphics.forEach(function (g) {
+      var tl = g.f.techLevel;
+      var need = size === 'aaa' ? 5 : size === 'large' ? 3 : 0;
+      if (tl < need) {
+        tag(g.$el, '\u2717 caps reviews at ' + (10 - Math.min(need - tl, 3)), 'gc-bad',
+          General.getGameSizeLabel(size) + ' games need graphics of tech level ' + need + ' (this is ' + tl + '): the review score is capped.');
+      } else if (tl === top && graphics.length > 1) {
+        tag(g.$el, '\u2605 most points', 'gc-great', 'The newest graphics give every development area the most base points (tech level ' + tl + ').');
+      }
+    });
+  };
+
+  wrap('_updateFeatureListContainer', function () {
+    setTimeout(function () {
+      try {
+        tagConceptFeatures();
+        tagStageFeatures();
+      } catch (e) {
+        if (typeof console !== 'undefined') console.error('Game Consultant: features', e);
+      }
+    }, 0);
+  });
 
   // ---------------------------------------------------------------- styles
 
@@ -1608,6 +1719,7 @@ var GameConsultant = GameConsultant || {};
     '.gc-seq-pick .gc-score{margin:0 4px 0 0;padding:0 5px;font-size:8.5pt}',
     '.gc-dim{color:#777}.gc-meh{color:#c48f00;font-weight:bold}',
     '.gc-locked{opacity:.6}.gc-grey{background:#999 !important}',
+    '.gc-ftag{position:relative;z-index:2;float:right;margin:1px 2px 0 6px;padding:0 6px;border-radius:7px;color:#fff;font-size:8.5pt;line-height:13pt;font-weight:bold;background:#777}',
     '.gc-card .gc-toggle{float:none;display:block;margin:6px 0 0;white-space:normal}',
     '.gc-stage{height:38px;overflow:hidden;margin:4px 6px 0;padding:2px 8px}',
     '.gc-stage .gc-auto{padding:1px 10px;font-size:9.5pt}',

@@ -1,13 +1,13 @@
 {
-	"id": "game-consultant",
-	"name": "Game Consultant",
-	"version": "1.2.0",
-	"author": "Benjythebee",
-	"description": "An in-game advisor that uses the game's own rules. Rates every topic, genre, audience and platform while you plan a game, creates the perfect combo in one click, recommends sliders and staff for each development stage, and tells you which games make great sequels and which publishing deals are worth taking. Only uses what your company has unlocked and the consoles on the market right now.",
-	"url": "https://github.com/Benjythebee/GDT_Game_consultant",
-	"main": "./consultant.js",
-	"image": "image.png",
-	"dependencies": {
-		"gdt-modAPI": "0.1.x"
-	}
+    "id": "game-consultant",
+    "name": "Game Consultant",
+    "version": "1.3.0",
+    "author": "Benjythebee",
+    "description": "[h1]Game Consultant[/h1]\nAn in-game advisor built on the game's own rules. It rates your choices as you plan a game and can pick the perfect combo in one click. It only uses what your company has: researched topics, unlocked features, consoles on the market now, your staff and your history.\n\n[h2]Game Concept[/h2]\n[list]\n[*]Topics, genres, audiences and platforms get a badge: [b]★ Best[/b] or a score like 92%.\n[*]Poor options are dimmed, or hidden with [b]Hide poor options[/b].\n[*]A side card rates your combo and warns about repeats.\n[*][b]Create perfect combo automatically[/b] fills everything in.\n[/list]\n\n[h2]Development stages[/h2]\n[list]\n[*]Recommended slider values for every stage, based on your exact topic and genre.\n[*]From medium games on, suggests who to put on each area based on skills, experts and workload.\n[*][b]Apply[/b] sets it all, or turn on [b]Auto-apply[/b].\n[/list]\n\n[h2]Sequels, deals and consoles[/h2]\n[list]\n[*][b]Sequels:[/b] tells you which games are a great pick right now, and when to wait.\n[*][b]Publishing deals:[/b] ranks offers by how good a game they let you make.\n[*][b]Your own consoles:[/b] counts the extra consoles a hit sells.\n[/list]\n\n[h2]Good to know[/h2]\n[list]\n[*]For Game Dev Tycoon 1.7.x. Needs the Mod API that ships with the game.\n[*]Works with modded topics and consoles.\n[*]Safe to turn off at any time.\n[/list]\n\nFeedback welcome in the comments!\n\nDisclaimer: I made this using Claude and I use it in my own personal games. I just figured I'd share it with others.\n",
+    "url": "https://github.com/Benjythebee/GDT_Game_consultant",
+    "main": "./consultant.js",
+    "image": "image-Thumbnail.png",
+    "dependencies": {
+        "gdt-modAPI": "0.1.x"
+    }
 }

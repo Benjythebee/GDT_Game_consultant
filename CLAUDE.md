@@ -165,6 +165,11 @@ Useful wiki pages: `Review_Algorithm/1.4.4`, `Tech_and_Design_Points_Generation_
   console sales (`Sales.getSalesAnomalyForConsole`, simulated in `ownConsoleBoost`, 12 chart weeks at 0.8) to the
   platform's sales term, converted to market units with `marketRevenue()` (median revenue per unit of release-week
   market of recent finished games). Test with `GDTDev.launchConsole()`.
+- Additional features: tags come from `tagStageFeatures` (stage "Selected Features" panel; re-run from `refreshStage` on
+  every slider/feature change) and `tagConceptFeatures` (concept screen 2, after `UI._updateFeatureListContainer`).
+  Capacity per area = share% / (5 x size factor) in raw `v`; owned features fill it first, then selected ones by cost/v.
+  A per-feature marginal test marks every feature of an over-full area as wasted, which is wrong; keep the fill order.
+  In the harness the stage dialog may need `GameManager.resume(true/false)` before it appears.
 - Harness + real saves: the game shows a "mods mismatch" dialog when a save's `company.mods` differs from the enabled
   mods; `GDTDev.loadSave` clears both in the browser copy.
 - Harness gotchas: the game re-renders `<body>` with jQuery (re-running body scripts), so mods are injected from

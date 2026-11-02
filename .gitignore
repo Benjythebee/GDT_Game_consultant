@@ -1,2 +1,4 @@
 # personal save backups made by mods/dev/export_save.py
 mods/dev/saves/
+# written into the mod folder by the game's Workshop uploader
+mods/*/*-Thumbnail.png
